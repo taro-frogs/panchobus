@@ -58,9 +58,7 @@
 
   <main id="content">
 
-    <!-- VIEW: LANDING (pública) -->
     <div class="view active" id="view-landing">
-      <!-- Hero -->
       <div class="landing-hero">
         <div class="landing-hero-text">
           <div class="landing-logo">PanchoBus</div>
@@ -76,7 +74,6 @@
         </div>
       </div>
 
-      <!-- Cómo funciona -->
       <div class="landing-section">
         <div class="section-title text-center mb-4" style="font-size:.85rem;">¿Cómo funciona?</div>
         <div class="row g-3">
@@ -107,7 +104,6 @@
         </div>
       </div>
 
-      <!-- Rutas principales -->
       <div class="landing-section">
         <div class="section-title text-center mb-4" style="font-size:.85rem;">Rutas principales</div>
         <div class="row g-2">
@@ -116,7 +112,6 @@
           <div class="col-6 col-md-3"><div class="landing-route-chip"><i class="bi bi-geo-alt-fill me-2"></i>Ruta 3B · Machala</div></div>
           <div class="col-6 col-md-3"><div class="landing-route-chip"><i class="bi bi-geo-alt-fill me-2"></i>Ruta 3A · San Luis</div></div>
           <div class="col-6 col-md-3"><div class="landing-route-chip"><i class="bi bi-geo-alt-fill me-2"></i>Ruta 4 · Carcelén</div></div>
-          <div class="col-6 col-md-3"><div class="landing-route-chip text-muted" style="opacity:.5;">+ más rutas...</div></div>
         </div>
       </div>
 
@@ -127,7 +122,6 @@
       </div>
     </div>
 
-    <!-- VIEW: LOGIN / REGISTRO -->
     <div class="view" id="view-login">
       <div class="login-screen">
         <div class="login-card">
@@ -140,7 +134,6 @@
             <button class="pb-tab active" id="tab-login"    onclick="switchAuthTab('login')">Iniciar sesión</button>
             <button class="pb-tab"        id="tab-registro" onclick="switchAuthTab('registro')">Crear cuenta</button>
           </div>
-          <!-- Login -->
           <div id="panel-login">
             <form id="inicio-sesion">
               <div class="mb-3">
@@ -155,7 +148,6 @@
             </form>
             <p id="mensaje-inicio-sesion" class="auth-msg mt-3"></p>
           </div>
-          <!-- Registro -->
           <div id="panel-registro" style="display:none;">
             <form id="form-registro">
               <div class="mb-3">
@@ -196,17 +188,16 @@
       </div>
     </div>
 
-    <!-- VIEW: INICIO -->
     <div class="view" id="view-inicio">
       <div class="row g-3">
         <div class="col-12" id="contenedor-reservas-inicio"></div>
         <div class="col-4"><div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Viajes este mes</div></div></div>
-        <div class="col-4"><div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">Rutas favoritas</div></div></div>
+        <div class="col-4"><div class="stat-card"><div class="stat-val" id="stat-favs">0</div><div class="stat-lbl">Rutas favoritas</div></div></div>
         <div class="col-4"><div class="stat-card"><div class="stat-val">R1</div><div class="stat-lbl">Ruta frecuente</div></div></div>
         <div class="col-12 col-lg-7">
           <div class="card-base p-3">
             <div class="section-title mb-2">Paradas cercanas</div>
-            <div class="input-icon-wrap mb-3"><i class="bi bi-search"></i><input type="text" class="pb-input" placeholder="Buscar rutas o paradas…" /></div>
+            <div class="input-icon-wrap mb-3"><i class="bi bi-search"></i><input type="text" class="pb-input" placeholder="Buscar rutas (presiona Enter)…" onkeyup="if(event.key === 'Enter'){ showView('rutas'); document.getElementById('search-rutas').value = this.value; renderAllRoutes(this.value); }" /></div>
             <div id="map-inicio" style="height:220px;border-radius:var(--radius);z-index:1;"></div>
           </div>
         </div>
@@ -224,10 +215,9 @@
       </div>
     </div>
 
-    <!-- VIEW: RUTAS -->
     <div class="view" id="view-rutas">
       <div class="row g-3">
-        <div class="col-12"><div class="input-icon-wrap"><i class="bi bi-search"></i><input type="text" class="pb-input" placeholder="Buscar ruta por nombre o destino…" /></div></div>
+        <div class="col-12"><div class="input-icon-wrap"><i class="bi bi-search"></i><input type="text" id="search-rutas" class="pb-input" placeholder="Buscar ruta por nombre o placa…" oninput="renderAllRoutes(this.value)" /></div></div>
         <div class="col-12 col-lg-8">
           <div class="card-base p-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -247,7 +237,6 @@
     </div>
 
 
-    <!-- VIEW: RUTA DETALLE -->
     <div class="view" id="view-ruta-detalle">
       <div class="row g-3">
         <div class="col-12">
@@ -258,8 +247,7 @@
         <div class="col-12 col-lg-5">
           <div class="card-base p-3">
             <div id="ruta-detalle-info">
-              <!-- Renderizado por JS -->
-            </div>
+              </div>
           </div>
           <div class="card-base p-3 mt-3">
             <div class="section-title">Paradas</div>
@@ -275,7 +263,6 @@
       </div>
     </div>
 
-    <!-- VIEW: PLANIFICADOR -->
     <div class="view" id="view-planificador">
       <div class="row g-3">
         <div class="col-12" id="contenedor-reservas-planificador"></div>
@@ -304,7 +291,6 @@
       </div>
     </div>
 
-    <!-- VIEW: NOTIFICACIONES -->
     <div class="view" id="view-notificaciones">
       <div class="row g-3">
         <div class="col-12 col-lg-7">
@@ -340,7 +326,6 @@
       </div>
     </div>
 
-    <!-- VIEW: PERFIL -->
     <div class="view" id="view-perfil">
       <div class="row g-3">
         <div class="col-12 col-lg-4">
@@ -377,7 +362,6 @@
       </div>
     </div>
 
-    <!-- VIEW: AJUSTES -->
     <div class="view" id="view-ajustes">
       <div class="row g-3">
         <div class="col-12 col-lg-6">
