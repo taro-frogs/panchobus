@@ -36,6 +36,7 @@ function verificarAutenticacion() {
       cargarReservaActiva();
       actualizarBadgesNotificaciones(session.user.id);
       actualizarPerfilUI(session.user);
+      actualizarContadorFavoritos(); // <--- Llama al contador al iniciar sesión
       showView('inicio');
     } else {
       document.getElementById('sidebar').style.display    = 'none';
@@ -225,35 +226,82 @@ async function guardarAjustes() {
   if (authData?.user) actualizarPerfilUI(authData.user);
 }
 
-// ── Rutas ─────────────────────────────────────
+// ── Rutas y Búsqueda ─────────────────────────────────────
 async function obtenerRutas() {
   const { data, error } = await supabase.from('rutas').select('*');
   if (error) { console.error(error.message); return []; }
   return data;
 }
 
-async function renderAllRoutes() {
+async function renderAllRoutes(filtro = '') {
   const container = document.getElementById('all-routes-list');
   if (!container) return;
-  const rutas = await obtenerRutas();
+  
+  let rutas = await obtenerRutas();
+
+  // 1. Aplicar filtro de búsqueda
+  if (filtro) {
+    const query = filtro.toLowerCase();
+    rutas = rutas.filter(r => 
+      r.nombre.toLowerCase().includes(query) || 
+      (r.placa_bus && r.placa_bus.toLowerCase().includes(query))
+    );
+  }
+
   if (rutas.length === 0) {
-    container.innerHTML = '<p class="text-center mt-3" style="font-size:.8rem;color:var(--text-muted);">No hay rutas disponibles.</p>';
+    container.innerHTML = '<p class="text-center mt-3" style="font-size:.8rem;color:var(--text-muted);">No se encontraron rutas.</p>';
     return;
   }
+
+  // 2. Obtener favoritos guardados
+  const favs = JSON.parse(localStorage.getItem('rutasFavoritas')) || [];
+
   container.innerHTML = rutas.map(r => {
     const libres = r.numero_asientos - r.asientos_ocupados;
     const badgeClass = (!r.disponible || libres <= 0) ? 'badge-red' : libres < 5 ? 'badge-gray' : 'badge-green';
     const badgeText  = (!r.disponible || libres <= 0) ? 'Sin espacio' : `${libres} asientos`;
+    
+    // Estado de la estrella
+    const isFav = favs.includes(r.id_ruta);
+    const starClass = isFav ? 'bi-star-fill text-red' : 'bi-star';
+    const starColor = isFav ? 'var(--red)' : 'var(--text-muted)';
+
     return `<div class="route-item">
       <div class="route-icon" onclick="verDetalleRuta(${r.id_ruta})" style="cursor:pointer;"><i class="bi bi-bus-front-fill"></i></div>
       <div style="flex:1;cursor:pointer;" onclick="verDetalleRuta(${r.id_ruta})">
         <div class="route-name">${r.nombre}</div>
         <div class="route-time">Bus: ${r.placa_bus} · <span style="color:var(--red);font-weight:600;">Ver detalle →</span></div>
       </div>
+      <i class="bi ${starClass}" onclick="toggleFavorito(${r.id_ruta}, event)" style="cursor:pointer; font-size: 1.2rem; color: ${starColor}; margin-right: 8px; transition: color 0.2s;" title="Marcar como favorita"></i>
       <span class="route-badge ${badgeClass}" style="cursor:pointer;" onclick="${libres > 0 ? 'seleccionarRuta(' + r.id_ruta + ')' : ''}">${badgeText}</span>
     </div>`;
   }).join('');
 }
+
+// ── Favoritos Lógica ──────────────────────────
+window.toggleFavorito = function(id_ruta, event) {
+  if(event) event.stopPropagation(); // Evita que se abra el detalle al tocar la estrella
+  let favs = JSON.parse(localStorage.getItem('rutasFavoritas')) || [];
+  
+  if (favs.includes(id_ruta)) {
+    favs = favs.filter(id => id !== id_ruta); // Quitar
+  } else {
+    favs.push(id_ruta); // Añadir
+  }
+  
+  localStorage.setItem('rutasFavoritas', JSON.stringify(favs));
+  
+  // Refrescar vista manteniendo la búsqueda activa
+  const searchInput = document.getElementById('search-rutas');
+  renderAllRoutes(searchInput ? searchInput.value : ''); 
+  actualizarContadorFavoritos();
+};
+
+window.actualizarContadorFavoritos = function() {
+  const favs = JSON.parse(localStorage.getItem('rutasFavoritas')) || [];
+  const favStat = document.getElementById('stat-favs');
+  if (favStat) favStat.textContent = favs.length;
+};
 
 async function renderPlanificadorRoutes() {
   const container = document.getElementById('planificador-routes-list');
@@ -620,6 +668,7 @@ function initTheme() {
 }
 
 // ── Exponer funciones al scope global ─────────
+window.renderAllRoutes           = renderAllRoutes;
 window.showView                  = showView;
 window.verDetalleRuta            = verDetalleRuta;
 window.marcarTodasLeidas         = marcarTodasLeidas;
